@@ -31,7 +31,7 @@ function stripQuotes(params) {
  * same for custom media queries.
  */
 function makeVarMap(filename) {
-  var map = {vars: {}, media: {}, selector: {}};
+  var map = {vars: {}, media: {}, selector: {}, apply: {}};
 
   function resolveImport(path, basedir) {
     if (path[0] === '/')
@@ -71,6 +71,18 @@ function makeVarMap(filename) {
 
       if (prop && prop.indexOf('--') === 0)
         map.vars[prop] = value;
+
+      if (decl.type === 'rule' && decl.selector.indexOf('--') === 0) {
+          const value = decl.nodes.map(item => {
+              if (item.type === 'decl') {
+                  return item.toString() + ';\n';
+              }
+
+              return item.toString() + '\n';
+          }).join('');
+          map.apply[decl.selector.replace(/:$/, '').replace(/^--/, '')] = value;
+
+      }
     });
   }
 
